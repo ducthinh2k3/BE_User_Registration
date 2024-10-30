@@ -28,11 +28,11 @@ public class UserImpService implements UserService {
     }
 
     @Override
-    public void saveUser(User user) {
+    public User saveUser(User user) {
         try {
-            userRepository.save(user);
+            return userRepository.save(user);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error saving user");
         }
     }
     

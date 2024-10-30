@@ -28,7 +28,7 @@ import com.example.ia03.services.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 public class UserController {
     
     @Autowired
@@ -80,9 +80,9 @@ public class UserController {
             User newUser = new User();
             newUser.setEmail(user.getEmail());
             newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            userService.saveUser(newUser);
+            User addUser = userService.saveUser(newUser);
             
-            SuccessResponse response = new SuccessResponse(HttpStatus.CREATED.value(), "User created successfully");
+            SuccessResponse response = new SuccessResponse(HttpStatus.CREATED.value(), "User created successfully", addUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
     }
