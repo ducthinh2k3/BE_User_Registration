@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
+import com.example.ia03.exceptions.LoginFailException;
 import com.example.ia03.exceptions.ValidationException;
 import com.example.ia03.models.User;
 import com.example.ia03.request.LoginRequest;
@@ -50,15 +51,13 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest user) {
         try {
-            System.out.println("LOGIN");
-            System.out.println(user.getEmail());
-            System.out.println(user.getPassword());
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
             );
-            return ResponseEntity.ok("Login successful");
+            SuccessResponse response = new SuccessResponse(HttpStatus.ACCEPTED.value(), "Login successfully", user.getEmail());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Login failed: " + e.getMessage());
+            throw new LoginFailException("Username or password is incorrect");
         }
 
     }

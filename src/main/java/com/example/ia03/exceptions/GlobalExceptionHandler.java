@@ -30,5 +30,15 @@ public class GlobalExceptionHandler{
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(value = LoginFailException.class)
+    public ResponseEntity<ErrorResponse> handleLoginFailException(LoginFailException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad credentials",
+                List.of(e.getMessage())
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
     
 }
