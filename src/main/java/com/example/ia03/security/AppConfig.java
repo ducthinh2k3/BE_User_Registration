@@ -69,9 +69,9 @@ public class AppConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
                         auth
-                            .requestMatchers("/api/user/register").permitAll()
-                            .requestMatchers("/api/user/login").permitAll()
-                            .requestMatchers("/api/user/get-users").permitAll()
+                            .requestMatchers("/user/register").permitAll()
+                            .requestMatchers("/user/login").permitAll()
+                            .requestMatchers("/user/get-users").permitAll()
                             .anyRequest().authenticated()
                             )
                 .logout(logout -> logout
