@@ -1,6 +1,7 @@
 package com.example.ia03.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -22,13 +26,16 @@ import com.example.ia03.exceptions.LoginFailException;
 import com.example.ia03.exceptions.ValidationException;
 import com.example.ia03.models.User;
 import com.example.ia03.request.LoginRequest;
+import com.example.ia03.response.AuthenticationReponse;
 import com.example.ia03.response.SuccessResponse;
+import com.example.ia03.response.UserCreateResponse;
 import com.example.ia03.services.UserService;
+import com.example.ia03.services.jwt.JWTService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/user")
+// @RequestMapping("/user")
 public class UserController {
     
     @Autowired
@@ -36,6 +43,9 @@ public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JWTService jwtService;
     
     private final PasswordEncoder passwordEncoder;
 
@@ -43,18 +53,29 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/get-users")
-    public ResponseEntity<List<User>> getAllProducts(){
-        return ResponseEntity.ok(userService.findAll());
+    @GetMapping("/profile")
+    public ResponseEntity<Object> getUser(@AuthenticationPrincipal UserDetails currentUser) {
+        try {
+            User user = userService.findByEmail(currentUser.getUsername());
+            SuccessResponse successResponse = new SuccessResponse(HttpStatus.OK.value(), "User found", user);
+            return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("User not found");
+        }
+        
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest user) {
         try {
-            authenticationManager.authenticate(
+            Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
             );
-            SuccessResponse response = new SuccessResponse(HttpStatus.ACCEPTED.value(), "Login successfully", user.getEmail());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = jwtService.generateTokenLogin(user);
+
+            AuthenticationReponse response = new AuthenticationReponse(HttpStatus.ACCEPTED.value(), jwt, user.getEmail());
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
         } catch (Exception e) {
             throw new LoginFailException("Username or password is incorrect");
@@ -81,8 +102,10 @@ public class UserController {
             newUser.setEmail(user.getEmail());
             newUser.setPassword(passwordEncoder.encode(user.getPassword()));
             User addUser = userService.saveUser(newUser);
+
+            UserCreateResponse userResponse = new UserCreateResponse(addUser.getId(), addUser.getEmail(), addUser.getCreatedAt());
             
-            SuccessResponse response = new SuccessResponse(HttpStatus.CREATED.value(), "User created successfully", addUser);
+            SuccessResponse response = new SuccessResponse(HttpStatus.CREATED.value(), "User created successfully", userResponse);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
     }

@@ -1,4 +1,5 @@
 package com.example.ia03.models;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -16,6 +17,7 @@ public class User {
 
     @Indexed(unique = true)
     @NotBlank(message = "Email is not null")
+    @Email(message = "Please provide a valid email address")
     private String email;
 
     @Size(min = 5, message="Password must be at least 5 characters")

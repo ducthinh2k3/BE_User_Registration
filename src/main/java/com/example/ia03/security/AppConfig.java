@@ -10,10 +10,12 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +28,9 @@ public class AppConfig {
 
     @Autowired
     private MyUserDetailServices userDetailService;
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -53,7 +58,7 @@ public class AppConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://fe-user-registration.onrender.com"));
+        configuration.setAllowedOrigins(Arrays.asList("https://5173-idx-first-nestjs-project-1727276807636.cluster-3g4scxt2njdd6uovkqyfcabgo6.cloudworkstations.dev"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -68,12 +73,12 @@ public class AppConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
-                        auth
-                            .requestMatchers("/user/register").permitAll()
-                            .requestMatchers("/user/login").permitAll()
-                            .requestMatchers("/user/get-users").permitAll()
-                            .anyRequest().authenticated()
-                            )
+                    auth
+                        .requestMatchers("/user/register", "/user/login").permitAll()  // Cho phép không cần token
+                        .anyRequest().authenticated()  // Các yêu cầu còn lại yêu cầu xác thực
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))    
                 .logout(logout -> logout
                     .logoutSuccessUrl("/")
                     .permitAll()    
