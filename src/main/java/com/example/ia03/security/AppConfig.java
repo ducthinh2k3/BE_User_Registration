@@ -58,7 +58,7 @@ public class AppConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://5173-idx-first-nestjs-project-1727276807636.cluster-3g4scxt2njdd6uovkqyfcabgo6.cloudworkstations.dev"));
+        configuration.setAllowedOrigins(Arrays.asList("https://fe-user-registration.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
