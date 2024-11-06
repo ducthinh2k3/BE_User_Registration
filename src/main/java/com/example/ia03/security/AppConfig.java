@@ -74,7 +74,7 @@ public class AppConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
                     auth
-                        .requestMatchers("/user/register", "/user/login").permitAll()  // Cho phép không cần token
+                        .requestMatchers("/register", "/login").permitAll()  // Cho phép không cần token
                         .anyRequest().authenticated()  // Các yêu cầu còn lại yêu cầu xác thực
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
